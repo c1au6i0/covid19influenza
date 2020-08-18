@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# covid19 and influenza vaccination coverage
+# COVID-19 and influenza vaccination coverage
 
 This repository contains the scripts used to analyzed the data reported
 in the paper:
@@ -11,9 +11,9 @@ in the paper:
 Claudio Zanettini\*, Mohamed Omar\*, Wikum Dinalankara, Eddie Luidy
 Imada, Elizabeth Colantuoni, Giovanni Parmigiani, and Luigi Marchionni.
 
-# Files and folders:
+## Files and folders:
 
-## code/scripts
+### code/scripts
 
 Contains the scripts for retrieving, pre-processing and analyzing the
 data.
@@ -36,14 +36,14 @@ data.
     propesity score is divided in quintiles or tertiles and added to the
     linear model as a factor or left as a continous variable.
 
-## code/analyses.R
+### code/analyses.R
 
 The file `analyses.R` executes all the scripts in `code/scripts` and
 aggregate results in 2 dataframes and in a table.
 
 -----
 
-# Sources and data
+## Sources and data
 
 The file `data/data_selected_variables.RDS` contains a static copy of
 the data used for the analysis.
