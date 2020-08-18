@@ -6,7 +6,7 @@
 This repository contains the scripts used to analyzed the data reported
 in the paper:
 
-*Influenza Vaccination and COVID19 Mortality in USA* 
+*Influenza Vaccination and COVID-19 Mortality in USA* 
 
 Claudio Zanettini\*, Mohamed Omar\*, Wikum Dinalankara, Eddie Luidy
 Imada, Elizabeth Colantuoni, Giovanni Parmigiani, and Luigi Marchionni.
