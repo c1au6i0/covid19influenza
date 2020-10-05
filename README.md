@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# COVID-19 and influenza vaccination coverage
+# COVID-19 and Influenza Vaccination
 
 This repository contains the scripts used to analyzed the data reported
 in the paper:
@@ -10,6 +10,18 @@ in the paper:
 
 Claudio Zanettini\*, Mohamed Omar\*, Wikum Dinalankara, Eddie Luidy
 Imada, Elizabeth Colantuoni, Giovanni Parmigiani, and Luigi Marchionni.
+
+## Background
+
+Analyses are performed using 4 set of variables :
+
+  - `knowledge-based`: based on medical knowledge
+      - `set15`: refered in the code as `selected`
+      - `set40`: refered in the code as `original`
+  - `agnostic`: selection based on variable importane estimated in
+    random forest.
+      - `set12`: refered in the code as `rf_parsimonius`
+      - `set38`: refered in the code as `rf_inclus`
 
 ## Files and folders:
 
@@ -27,26 +39,28 @@ data.
   - `code/scripts/us_preprocess`: this is used to retrieve and
     pre-process U.S data. Execution of this script returns the dataframe
     used for the analyses (`dat_selected`). A static copy of the
-    dataframe is in `data/data_selected_variables.RDS`.
+    dataframe is in `data/all_raw.RDS`.
 
-  - `code/strata_selected_variables.R`: used to perform stratified and
-    stability analyses.
+  - `code/strata_**set**.R`: used to perform stratified analyses.
 
-  - `code/strata_selected_variables.R`: includes the analyses in which
-    propesity score is divided in quintiles or tertiles and added to the
-    linear model as a factor or left as a continous variable.
+  - `code/secondary_**set**.R`: includes the analyses in which propesity
+    score is divided in quintiles or tertiles and added to the linear
+    model as a factor or left as a continous variable.
+
+  - `code/extra_analyses.R`: 5-times 10-fold-cross validation resampling
+    to identify most parsimonious model.
 
 ### code/analyses.R
 
 The file `analyses.R` executes all the scripts in `code/scripts` and
-aggregate results in 2 dataframes and in a table.
+print results tables.
 
 -----
 
 ## Sources and data
 
-The file `data/data_selected_variables.RDS` contains a static copy of
-the data used for the analysis.
+The file `data/all_raw.RDS` contains a static copy of the data used for
+the analysis.
 
 Details regarding the data sources as well as functions to extract
 updated COVID-19 data and aggregate them with other socio-economic and
@@ -56,3 +70,6 @@ package README or documentation for more information regarding the
 variables. The scripts used to import static data are reported in the
 package repository
 [here](https://github.com/c1au6i0/covid19census/data-raw/).
+
+\*\* Note: use package `renv` and `renv.lock` file in parent folder to
+install the same versions of packages that we used.\*\*

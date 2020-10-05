@@ -1,9 +1,33 @@
-#' @@@@@@@@@@@@@@@@@@@@@@
+#' @@@@@@@@@@@@@@@@@@@@@@@
 #' US: preprocessing-----
-#' @@@@@@@@@@@@@@@@@@@@@@
+#' @@@@@@@@@@@@@@@@@@@@@@@
+# us_scripts <- list(
+#   "libraries.R",
+#   "functions_analysis.R",
+#   "functions_graph.R"
+# )
+#
+# library(here)
+# lapply(us_scripts, function(x) source(here("code", "county_level", "scripts", x)))
 
 min_filt <- 1
-date_freeze <- "2020-07-15"
+date_freeze <- "2020-09-20"
+
+fips_nyc <- c(36085, 36061, 36081, 36047, 36005)
+
+# These are the variable that will be selected. Original preprint and second preprint
+to_select <- c(
+  "date", "county", "state", "fips", "cases", "deaths", "total_pop", "perc_families",
+  "perc_family_only_onep", "perc_edu_bachelor", "perc_withinternet", "perc_imm65", "total_beds",
+  "ratio_beds", "perc_alzheimer_dementia", "perc_asthma", "perc_atrial_fibrillation",
+  "perc_cancer_breast", "perc_cancer_colorectal", "perc_cancer_lung", "perc_ch_obstructive_pulm",
+  "perc_chronic_kidney_disease", "perc_depression", "perc_diabetes", "perc_heart_failure",
+  "perc_hypertension", "perc_ischemic_heart_disease", "perc_obesity", "perc_rheumatoid_arthritis",
+  "perc_stroke", "perc_tobacco_use", "median_income", "pm2.5", "summer_temp", "summer_hum",
+  "winter_temp", "winter_hum", "perc_age65_over", "median_age", "sex_ratio", "child_dependency",
+  "perc_black", "perc_lat", "perc_white", "perc_asian", "perc_island", "perc_other",
+  "perc_two_more_races", "days_f0", "perc_imm65"
+)
 
 to_select_2 <- c(
   "date", "county", "state", "fips", "cases", "deaths", "total_pop",
@@ -124,9 +148,19 @@ suppressWarnings(
 )
 
 
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+# dat_original ORIGINAL VARIABLE (as in the preprint) -----
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+# function dat_select_ZZ_XX defined in analysis_functions.R
+#  Function that selects variables from dataframe (df2), join the dataframe with the one containing census regions,
+# rename variables applying prefix XX, ZZ and calculate logit of ZZ
+
+dat_original <- dat_select_ZZ_XX(dat = df2, var_select = to_select, census_r = census_regions)
+
 
 # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-# dat_selected SELECTED VARIABLES ---------
+# dat_selected SELECTED VARIABLE -------------
 # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 # function dat_select_ZZ_XX defined in analysis_functions.R
@@ -136,22 +170,149 @@ suppressWarnings(
 dat_selected <- dat_select_ZZ_XX(dat = df2, var_select = to_select_2, census_r = census_regions)
 
 
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+# dat_rf_inclus & dat_rf_pars VARIABLES RANDOM FOREST -----
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+# NOTE that dat_rf contains data only of the last day
+# the code below is to select variables based on RandomForest Selection
+# the code was slightly altered from the one provided by Elisabeth
+# 2 set of variables are selected:
+#   parsimonious: 12 vars
+#   inclusive: 38 vars
+
+# all variables today filt == 1
+today_filt_rf <- df2 %>%
+  mutate(logit_perc_imm65 = logit(perc_imm65)) %>%
+  filter(date == max(date), cases >= !!min_filt) %>%
+  filter(!county %in% c("Unassigned", "Out of", "Unknown"))
 
 
+# vars_el <- c(
+#   "perc_families", "perc_family_only_onep",
+#   "perc_withinternet", "perc_edu_9grade",
+#   "perc_edu_nodiploma", "perc_edu_highschool",
+#   "perc_edu_somecollege", "perc_edu_associate",
+#   "perc_edu_bachelor", "perc_edu_gradprofess",
+#   "perc_edu_highschool_higher", "perc_edu_bachelor_higher",
+#   "perc_age65_over", "median_age", "sex_ratio",
+#   "age_dependency", "child_dependency",
+#   # "ratio_beds",
+#   "perc_acute_myocardial_infarction", "perc_alzheimer_dementia",
+#   "perc_asthma", "perc_atrial_fibrillation",
+#   "perc_cancer_breast", "perc_cancer_colorectal",
+#   "perc_cancer_lung", "perc_cancer_all",
+#   "perc_ch_obstructive_pulm", "perc_chronic_kidney_disease",
+#   "perc_depression", "perc_diabetes",
+#   "perc_heart_failure", "perc_hypertension",
+#   "perc_ischemic_heart_disease", "perc_obesity",
+#   "perc_osteoporosis", "perc_rheumatoid_arthritis",
+#   "perc_schizophrenia_psychotic_dis", "perc_stroke",
+#   "perc_tobacco_use", "annual_wellness_visit",
+#   "perc_poverty",
+#   "median_income", "pm2.5",
+#   "summer_temp", "summer_hum",
+#   "winter_temp", "winter_hum",
+#   "urban", "perc_black",
+#   "perc_lat", "perc_white",
+#   "perc_asian", "perc_island", "perc_native",
+#   "perc_other", "perc_two_more_races", "logit_perc_imm65"
+# )
+
+# we excluded all counties with at least 500 missing values
+to_exclude <- c(
+  "fips",
+  "county",
+  "state",
+  "date",
+  "deaths",
+  "cases",
+  "cmr",
+  "total_pop",
+  "perc_imm65",
+  "perc_pneumococcal_vaccine",
+  "f_date", # actual date in which the first case was recorded
+
+  "perc_poverty_pacificisland",
+  "dex_a",
+  "pending",
+  "hospitalized_cumul",
+  "icu_curr",
+  "icu_cumul",
+  "ventilator_curr",
+  "ventilator_cumul",
+  "recovered",
+  "ratio_beds",
+  "total_beds"
+)
+
+# we do not include variables that start with `total`, becouse redundant, with the exception
+# of "total_pop", "total_tests"
+total_vars <- grep("^total", names(today_filt_rf), value = TRUE)
+total_exclude <- total_vars[!total_vars %in% c("total_pop", "total_tests")]
+
+to_exclude_all <- c(to_exclude, total_exclude)
+
+# dataset without variables with NAs or Totals
+dat_rf_exclusions <- today_filt_rf %>%
+  filter(state != "Puerto Rico") %>%
+  select(-!!to_exclude_all)
+
+# y_var <- dat_rf_exclusions$logit_perc_imm65
+# x_var <- dat_rf_exclusions[, names(dat_rf_exclusions) != "logit_perc_imm65"]
+
+set.seed(615)
+
+mess <- "\nRunning Random Forest to select variables!\n"
+sep_mess <- paste(rep.int("=", nchar(mess)), collapse = "")
+
+message(paste0(sep_mess, mess, sep_mess))
+
+rf <- randomForest(logit_perc_imm65 ~ .,
+  mtry = 5, ntree = 500,
+  importance = TRUE,
+  na.action = na.roughfix,
+  data = dat_rf_exclusions
+)
+
+# png(filename = here("figs", "rfImportance.png"), width = 2000, height = 2000, res = 300)
+varImpPlot(rf, n.var = 203, type = 2, cex = 0.4)
+abline(v = 3.5, col = "red")
+abline(v = 6.5, col = "blue")
+# dev.off()
+
+# x = x_var, y = y_var,
+# select the first
+confounders <- rf$importance %>%
+  as.data.frame() %>%
+  mutate(var_select = row.names(.)) %>%
+  slice_max(order_by = IncNodePurity, n = 200) %>%
+  select(var_select) %>%
+  unlist()
+
+# select 4 and 22
+
+# we also need other vars and the identifiers
+other_vars <- c(
+  "date", "county", "state", "fips", "cases", "deaths", "total_pop",
+  "perc_imm65"
+)
+
+# These are the variables that will be selected
+to_select_rf_pars <- as.character(unlist(c(other_vars, confounders[1:12])))
+
+to_select_rf_inclus <- as.character(unlist(c(other_vars, confounders[1:38])))
 
 
+# function dat_select_ZZ_XX defined in analysis_functions.R
+#  Function that selects variables from dataframe (df2), join the dataframe with the one containing census regions,
+# rename variables applying prefix XX, ZZ and calculate logit of ZZ
+
+# dat_rf data with variables selected with RandomForest
+dat_rf_pars <- dat_select_ZZ_XX(dat = df2, var_select = to_select_rf_pars, census_r = census_regions) %>%
+  filter(date == max(date), NC_cases >= min_filt)
 
 
-
-
-
-
-
-
-
-
-
-
-
+dat_rf_inclus <- dat_select_ZZ_XX(dat = df2, var_select = to_select_rf_inclus, census_r = census_regions) %>%
+  filter(date == max(date), NC_cases >= min_filt)
 
 

@@ -1,3 +1,15 @@
+# us_scripts <- list(
+#   "libraries.R",
+#   "functions_analysis.R",
+#   "functions_graph.R",
+#   "us_preprocess.R"
+# )
+#
+# # Ode to the here https://github.com/jennybc/here_here
+# library(here)
+# lapply(us_scripts, function(x) source(here("code", "scripts", "county_level", x)))
+
+
 mess <- "\nPerforming secondary analyses on selected!!\n"
 sep_mess <- paste(rep.int("=", nchar(mess)), collapse = "")
 
@@ -38,16 +50,15 @@ prop_scores_selected <- lm(form_ps, data = selected_today_1case)
 summary(prop_scores_selected)
 
 summary(fitted.values(prop_scores_selected))
-
-# @@@@@@@@@@@@@
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 # US: Quintiles
-# @@@@@@@@@@@@@
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 pp_split_quint <- 5
 
-# @@@@@@@@@@@@@@@@@@@@@
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 # Quintile divname-----
-# @@@@@@@@@@@@@@@@@@@@@
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 quint_divname_selected <- glm_pp(
   dat = data_to_use,
@@ -71,9 +82,9 @@ tidy(quint_divname_selected)
 quint_divname_selected <- calculate_MRR(tidy(quint_divname_selected), 10) %>%
   mutate(adjustment = "divname", nyc_removed = FALSE, type_pp = "quintile")
 
-# @@@@@@@@@@@@@@@@@@@
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 # Quintile state-----
-# @@@@@@@@@@@@@@@@@@@
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 quint_state_selected <- glm_pp(
   dat = data_to_use,
@@ -98,14 +109,14 @@ tidy(quint_state_selected)
 quint_state_selected <- calculate_MRR(tidy(quint_state_selected), 10) %>%
   mutate(adjustment = "state", nyc_removed = FALSE, type_pp = "quintile")
 
-# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 # Quintile divname no NYC -----
-# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 quint_divname_selected_nonyc <-
 
   data_to_use %>%
-  filter(county != "New York City") %>%
+  filter(!fips %in% !!fips_nyc) %>%
   glm_pp(
     dat = .,
     dates_tostudy = max(dates_tostudy),
@@ -130,14 +141,14 @@ quint_divname_selected_nonyc <- calculate_MRR(tidy(quint_divname_selected_nonyc)
 
 # lincom(us_perc_imm65_deahts_pop_quint_nonyc, "ZZ_perc_imm65", eform = TRUE)
 
-# @@@@@@@@@@@@@@@@@@@@@@@@@@@
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 # Quintile state no NYC -----
-# @@@@@@@@@@@@@@@@@@@@@@@@@@@
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 quint_state_selected_nonyc <-
 
   data_to_use %>%
-  filter(county != "New York City") %>%
+  filter(!fips %in% !!fips_nyc) %>%
   glm_pp(
     dat = .,
     dates_tostudy = max(dates_tostudy),
@@ -160,16 +171,17 @@ quint_state_selected_nonyc <- extract_model(quint_state_selected_nonyc, filt_cas
 quint_state_selected_nonyc <- calculate_MRR(tidy(quint_state_selected_nonyc), 10) %>%
   mutate(adjustment = "state", nyc_removed = TRUE, type_pp = "quintile")
 
+
 # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-# @@@@@@@@@@@@
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 # US: Tertiles
-# @@@@@@@@@@@@
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 pp_split_tert <- 3
 
-# @@@@@@@@@@@@@@@@@@@@
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 # tertile divname-----
-# @@@@@@@@@@@@@@@@@@@@
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 tert_divname_selected <- glm_pp(
   dat = data_to_use,
@@ -193,9 +205,9 @@ tidy(tert_divname_selected)
 tert_divname_selected <- calculate_MRR(tidy(tert_divname_selected), 10) %>%
   mutate(adjustment = "divname", nyc_removed = FALSE, type_pp = "tertile")
 
-# @@@@@@@@@@@@@@@@@@
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 # tertile state-----
-# @@@@@@@@@@@@@@@@@@
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 tert_state_selected <- glm_pp(
   dat = data_to_use,
@@ -218,14 +230,14 @@ tert_state_selected <- extract_model(tert_state_selected, filt_cases = min_filt)
 tert_state_selected <- calculate_MRR(tidy(tert_state_selected), 10) %>%
   mutate(adjustment = "state", nyc_removed = FALSE, type_pp = "tertile")
 
-# @@@@@@@@@@@@@@@@@@@@@@@@@@@@
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 # tertile divname no NYC -----
-# @@@@@@@@@@@@@@@@@@@@@@@@@@@@
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 tert_divname_selected_nonyc <-
 
   data_to_use %>%
-  filter(county != "New York City") %>%
+  filter(!fips %in% !!fips_nyc) %>%
   glm_pp(
     dat = .,
     dates_tostudy = max(dates_tostudy),
@@ -250,14 +262,14 @@ tert_divname_selected_nonyc <- calculate_MRR(tidy(tert_divname_selected_nonyc), 
 
 # lincom(us_perc_imm65_deahts_pop_tert_nonyc, "ZZ_perc_imm65", eform = TRUE)
 
-# @@@@@@@@@@@@@@@@@@@@@@@@@@
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 # tertile state no NYC -----
-# @@@@@@@@@@@@@@@@@@@@@@@@@@
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 tert_state_selected_nonyc <-
 
   data_to_use %>%
-  filter(county != "New York City") %>%
+  filter(!fips %in% !!fips_nyc) %>%
   glm_pp(
     dat = .,
     dates_tostudy = max(dates_tostudy),
@@ -314,9 +326,9 @@ cont_divname_selected <- extract_model(cont_divname_selected, filt_cases = min_f
 cont_divname_selected <- calculate_MRR(tidy(cont_divname_selected), 10) %>%
   mutate(adjustment = "divname", nyc_removed = FALSE, type_pp = "continuous")
 
-# @@@@@@@@@@@@@@@@@@@@@@@
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 # PS contineous state----
-# @@@@@@@@@@@@@@@@@@@@@@@
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 cont_state_selected <- glm_pp(
   dat = data_to_use,
@@ -360,13 +372,13 @@ cont_divname_selected_inter <- glm_pp(
 cont_divname_selected_inter <- extract_model(cont_divname_selected_inter, filt_cases = min_filt)
 summary(cont_divname_selected_inter)
 
-# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 # PS contineous divname Without NYC----
-# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 cont_divname_selected_nonyc <-
   data_to_use %>%
-  filter(county != "New York City") %>%
+  filter(!fips %in% !!fips_nyc) %>%
   glm_pp(
     dat = .,
     dates_tostudy = max(dates_tostudy),
@@ -387,13 +399,13 @@ cont_divname_selected_nonyc <- extract_model(cont_divname_selected_nonyc, filt_c
 cont_divname_selected_nonyc <- calculate_MRR(tidy(cont_divname_selected_nonyc), 10) %>%
   mutate(adjustment = "divname", nyc_removed = TRUE, type_pp = "continuous")
 
-# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 # PS contineous state Without NYC----
-# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 cont_state_selected_nonyc <-
   data_to_use %>%
-  filter(county != "New York City") %>%
+  filter(!fips %in% !!fips_nyc) %>%
   glm_pp(
     dat = .,
     dates_tostudy = max(dates_tostudy),
@@ -413,10 +425,6 @@ cont_state_selected_nonyc <- extract_model(cont_state_selected_nonyc, filt_cases
 
 cont_state_selected_nonyc <- calculate_MRR(tidy(cont_state_selected_nonyc), 10) %>%
   mutate(adjustment = "state", nyc_removed = TRUE, type_pp = "continuous")
-
-# @@@@@@@@
-# MRR ---
-# @@@@@@@
 
 MMR_secondary_selected_binded <- bind_rows(
   quint_divname_selected,

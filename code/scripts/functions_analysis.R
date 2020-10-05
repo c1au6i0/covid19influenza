@@ -10,7 +10,7 @@ logit <- function(p) {
 
 #' dat_select_ZZ_XX
 #'
-#' Function that selects variables from dataframe (df2), joins the dataframe with the one containing census regions,
+#' Function that select variables from dataframe (df2), join the dataframe with the one containing census regions,
 #' rename variables applying prefix XX, ZZ and calculate logit of ZZ
 #'
 #' @param dat
@@ -377,7 +377,7 @@ extract_model <- function(x, filt_cases = 1, model = "main") {
 
 #' extract_tidy_results
 #'
-#' Extract tidy summary of variable of interest of last day available from object returned by
+#' Extract tidy summary of last day available regarding var on interest  from object returned by
 #' glm_pp
 #'
 #' @param x  object return by glm_pp
@@ -430,6 +430,7 @@ extract_mortality_ratio <- function(model_pp,
 }
 
 
+
 #' strata_glm_pp
 #'
 #' @param dat dataframe
@@ -460,7 +461,7 @@ strata_glm_pp <- function(dat,
 
   if (nonyc == TRUE) {
     dat <- dat %>%
-      filter(county != "New York City")
+      filter(!fips %in% !!fips_nyc)
   }
 
   if (pp_engine == "lm") {
@@ -599,7 +600,7 @@ strata_check_pp <- function(dat,
 
   if (nonyc == TRUE) {
     dat <- dat %>%
-      filter(county != "New York City")
+      filter(!fips %in% !!fips_nyc) 
   }
 
   if (pp_engine == "lm") {

@@ -1,3 +1,15 @@
+# us_scripts <- list(
+#   "libraries.R",
+#   "functions_analysis.R",
+#   "functions_graph.R",
+#   "us_preprocess.R"
+# )
+#
+#
+# # Ode to the here https://github.com/jennybc/here_here
+# library(here)
+# lapply(us_scripts, function(x) source(here("code", "county_level", "scripts", x)))
+
 mess <- "\nAnalyzing Strata selected!\n"
 sep_mess <- paste(rep.int("=", nchar(mess)), collapse = "")
 
@@ -12,14 +24,14 @@ data_to_use <- dat_selected
 
 dates_tostudy <- sort(unique(data_to_use$date))
 dates_tostudy <- dates_tostudy[(length(dates_tostudy) - 60):length(dates_tostudy)]
-to_filt_cases <- 1:25
+to_filt_cases <- 1:100
 XX <- grep("XX", names(data_to_use), value = TRUE)
 min_filt <- 1
 variables_used <- "selected"
 
 # Dry? no, definitely WET :(
 
-# @@@@@@@@@@@@@@@@@@@@@@@
+# @@@@@@@@@@@@@@@@@@@@@@@@
 # TERTILE ---------------
 # @@@@@@@@@@@@@@@@@@@@@@@
 
@@ -140,9 +152,9 @@ strata_noadj_original_3 <- strata_glm_pp(
 
 strata_weights_MRR(strata_noadj_original_3)
 
-# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+# @@@@@@@@@@@@@@@@@
 # Results in individual strata 1 case and last date (divname)
-# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+# @@@@@@@@@@@@@@@@@
 
 strata_divname_selected_1case_3 <- map_dfr(1, strata_glm_pp,
   dat = data_to_use,
@@ -156,10 +168,10 @@ strata_divname_selected_1case_3 <- map_dfr(1, strata_glm_pp,
 
 strata_divname_selected_1case_3[, c("data", "model")] <- NULL
 
-individual_strata <- strata_divname_selected_1case_3 %>%
+IndividualStrata <- strata_divname_selected_1case_3 %>%
   filter(term %in% c("(Intercept)", "ZZ_perc_imm65", "PP"))
 
-individual_strata[, c(1, 8:10)] <- NULL
+IndividualStrata[, c(1, 8:10)] <- NULL
 
 # @@@@@@@@@@@@@@@@@
 # Calculate MRR
@@ -195,3 +207,4 @@ MRR_strata_selected_3_today <- MRR_strata_selected_3 %>%
   filter(analysis_group != "dates") %>%
   filter(date == max(date)) %>%
   filter(filt == 1)
+
